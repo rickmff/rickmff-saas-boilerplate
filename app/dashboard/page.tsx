@@ -38,7 +38,7 @@ export default function DashboardPage() {
           Welcome back, {user?.firstName}!
         </h2>
         <p className="text-muted-foreground">
-          Here's an overview of your prompt management
+          Here's an overview of your prompt management.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
