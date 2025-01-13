@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Prompt to AI:
 
-## Getting Started
+Let's build a micro-SaaS application using Next.js with the app router. The application already has auth, database, and Stripe implemented. If interacting with the database for saving or retrieving data, use Prisma. Then, send me the Prisma model, and I will push it to the database myself.
 
-First, run the development server:
+This app wil be a Prompt Manager - A micro-SaaS tool for users to store and manage their own prompts and access pre-defined, read-only templates from a centralized database.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Application Features and Pages:
+Navbar:
+Include a sleek, modern navigation bar at the top of the page.
+Logo positioned on the left.
+Navigation links: "Dashboard", "Pricing", "Login/Register".
+Ensure the design is responsive and adapts seamlessly to mobile and desktop screens.
+Landing Page:
+Design a modern, call-to-action-oriented landing page with clean lines and vibrant colors.
+Hero Section: Captivating headline, supporting text, and a prominent call-to-action button encouraging users to sign up or log in.
+Include a visually appealing image or illustration relevant to prompts and templates.
+Features Section: Add sections with brief descriptions highlighting the app's functionality (e.g., "Save and Manage Your Prompts", "Access Pre-Defined Templates").
+Footer: Include essential links (e.g., About, Contact, Privacy Policy).
+Dashboard Page:
+Create a user-friendly dashboard page with a sidebar for easy navigation.
+Sidebar options:
+"My Prompts":
+Allow users to create, edit, delete, and view their own prompts.
+Display prompts in a clean list or card layout with details (e.g., title, description, date created).
+Add a "Create Prompt" button that opens a form for adding new prompts (fields: title, description, tags).
+"Prompt Templates":
+Display a list of pre-defined prompts fetched from the database.
+Templates should be read-only (no edit/delete actions for users).
+Organize templates by categories (e.g., "Marketing", "Writing").
+Ensure the dashboard layout is intuitive and emphasizes ease of use.
+Database Interaction:
+Prisma Models:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Use Prisma to manage database interactions. Below is an example schema:
+prisma
+Copy code
+model Prompt {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+model Template {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String
+}
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For "My Prompts", store user-specific prompts with a userId reference to allow filtering.
+For "Prompt Templates", store pre-defined templates that can be fetched for display only.
+Additional Considerations:
+Design:
 
-## Learn More
+Use clean, modern typography with sufficient white space for readability.
+Implement a professional color scheme (e.g., gradients or complementary colors).
+Ensure accessibility standards (WCAG) for inclusivity.
 
-To learn more about Next.js, take a look at the following resources:
+Optimize the application for fast load times and performance on all devices.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Follow modern web development practices, such as modular architecture and reusable components.
+Write clean, maintainable code that prioritizes ease of scaling.
