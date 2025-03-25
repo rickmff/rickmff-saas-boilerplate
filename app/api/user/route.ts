@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import prisma from '@/lib/db';
+import { db, users } from '@/lib/db';
+import { eq } from 'drizzle-orm';
+import { stripe } from '@/lib/stripe';
 
 export async function GET() {
   try {
@@ -9,14 +11,25 @@ export async function GET() {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        subscription: true
-      }
-    });
+    const [user] = await db.select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
-    return NextResponse.json(user);
+    if (!user) {
+      return new NextResponse('User not found', { status: 404 });
+    }
+
+    let subscription = null;
+    if (user.stripeCustomerId) {
+      const subscriptions = await stripe.subscriptions.list({
+        customer: user.stripeCustomerId,
+        status: 'active',
+      });
+      subscription = subscriptions.data[0] || null;
+    }
+
+    return NextResponse.json({ ...user, subscription });
   } catch (error) {
     console.error('[USER_GET]', error);
     return new NextResponse('Internal Error', { status: 500 });

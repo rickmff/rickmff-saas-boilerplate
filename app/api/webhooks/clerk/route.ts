@@ -1,14 +1,14 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
-import prisma from '@/lib/db'
+import { db, users } from '@/lib/db'
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
-  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
+  const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
 
-  if (!WEBHOOK_SECRET) {
-    throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local')
+  if (!CLERK_WEBHOOK_SECRET) {
+    throw new Error('Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local')
   }
 
   // Get the headers
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const body = JSON.stringify(payload)
 
   // Create a new Svix instance with your secret.
-  const wh = new Webhook(WEBHOOK_SECRET)
+  const wh = new Webhook(CLERK_WEBHOOK_SECRET)
 
   let evt: WebhookEvent
 
@@ -50,25 +50,21 @@ export async function POST(req: Request) {
   if (evt.type === 'user.created') {
     const { id, email_addresses, first_name, last_name } = evt.data
 
-
     try {
+      const fullName = `${first_name || ''} ${last_name || ''}`.trim()
 
-        const fullName = `${first_name || ''} ${last_name || ''}`.trim()
+      await db.insert(users).values({
+        id,
+        email: email_addresses[0].email_address,
+        name: fullName || null
+      })
 
-        await prisma.user.create({
-            data: {
-                id,
-                email: email_addresses[0].email_address,
-                name: fullName || null
-            }
-        })
-        console.log(`User with ID ${id} was inserted into the database.`)
+      console.log(`User with ID ${id} was inserted into the database.`)
     } catch (error) {
-        console.error('Error saving user to the DB', error)
-        return new Response('Error saving user', {status: 500})
+      console.error('Error saving user to the DB', error)
+      return new Response('Error saving user', { status: 500 })
     }
   }
-  
 
   return new Response('', { status: 200 })
 }

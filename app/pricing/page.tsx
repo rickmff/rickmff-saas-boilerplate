@@ -1,107 +1,88 @@
 import { Button } from "@/components/ui/button"
 import React from "react"
-import prisma from "@/lib/db"
+import { db, users } from "@/lib/db"
 import { getStripeSession, stripe } from "@/lib/stripe"
 import { redirect } from "next/navigation"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
-
-async function getData(userId: string | null) {
-    if (!userId) return null
-
-    const subscription = await prisma.subscription.findUnique({
-        where: {
-            userId: userId
-        },
-        select: {
-            status: true,
-            user: { select: { stripeCustomerId: true }}
-        }
-    })
-
-    return subscription
-}
+import { eq } from "drizzle-orm"
 
 export default async function Pricing() {
-
     const { userId } = auth();
-    const user = await currentUser();
+    if (!userId) {
+        return redirect('/sign-in');
+    }
 
-    const subscription = await getData(userId)
+    const [user] = await db.select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
 
-    const isSubscribed = subscription?.status === "active"
+    if (!user) {
+        return redirect('/sign-in');
+    }
+
+    let isSubscribed = false;
+    if (user.stripeCustomerId) {
+        const subscriptions = await stripe.subscriptions.list({
+            customer: user.stripeCustomerId,
+            status: 'active',
+        });
+        isSubscribed = subscriptions.data.length > 0;
+    }
 
     async function createSubscription() {
         "use server"
 
-        if (!userId) {
-            return redirect('/sign-in?redirect_url=/pricing')
+        const user = await currentUser();
+        if (!user) {
+            return redirect('/sign-in');
         }
 
-        let databaseUser = await prisma.user.findUnique({
-            where: {
-                id: userId
-            },
-            select: {
-                stripeCustomerId: true
-            }
-        })
+        const [dbUser] = await db.select()
+            .from(users)
+            .where(eq(users.id, user.id))
+            .limit(1);
 
-        if (!databaseUser) {
-            throw new Error('DatabaseUser Not Found')
+        if (!dbUser?.stripeCustomerId) {
+            return redirect('/sign-in');
         }
 
-        const email = user?.primaryEmailAddress?.emailAddress
-        
-        if (!databaseUser.stripeCustomerId) {
-            const customer = await stripe.customers.create({
-                email: email
-            })
+        const session = await getStripeSession({
+            priceId: process.env.STRIPE_PRICE_ID!,
+            domainUrl: process.env.NEXT_PUBLIC_APP_URL!,
+            customerId: dbUser.stripeCustomerId,
+        });
 
-            databaseUser = await prisma.user.update({
-                where: {
-                    id: userId
-                },
-                data: {
-                    stripeCustomerId: customer.id
-                },
-                select: { stripeCustomerId: true }
-            })
-
-            console.log('databaseUser', databaseUser)
-        }
-
-        if (!databaseUser.stripeCustomerId) {
-            throw new Error('Failed to set stripeCustomerId for the user')
-        }
-
-        const subscriptionUrl = await getStripeSession({
-            customerId: databaseUser.stripeCustomerId,
-            domainUrl: process.env.NODE_ENV === 'production' ? (process.env.PRODUCTION_URL as string) : 'http://localhost:3000',
-            priceId: process.env.STRIPE_PRICE_ID as string
-        })
-
-        return redirect(subscriptionUrl)
+        return redirect(session);
     }
 
-
-    async function createCustomerPortal(){
+    async function createCustomerPortal() {
         "use server"
 
-        if (!userId) {
-            return redirect('sign-in?redirect_url=/pricing')
+        const user = await currentUser();
+        if (!user) {
+            return redirect('/sign-in');
+        }
+
+        const [dbUser] = await db.select()
+            .from(users)
+            .where(eq(users.id, user.id))
+            .limit(1);
+
+        if (!dbUser?.stripeCustomerId) {
+            return redirect('/sign-in');
         }
 
         const customerPortalUrl = await stripe.billingPortal.sessions.create({
-            customer: subscription?.user.stripeCustomerId as string,
-            return_url: process.env.NODE_ENV === 'production' ? (process.env.PRODUCTION_URL as string) : 'http://localhost:3000'
-        })
+            customer: dbUser.stripeCustomerId,
+            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+        });
 
-        return redirect(customerPortalUrl.url)
+        return redirect(customerPortalUrl.url);
     }
 
-    const backLink = userId ? '/dashboard' : '/'
-
+    const backLink = userId ? '/dashboard' : '/';
 
     return (
         <div className="max-w-2xl mx-auto py-8 px-4">
@@ -109,7 +90,7 @@ export default async function Pricing() {
             <div className="space-y-4 rounded-lg border bg-card text-card-foreground shadow-sm p-6">
                 <Link href={backLink} className="text-sm font-medium text-primary underline-offset-4 hover:underline">&larr; Back</Link>
                 <h2 className="border-b pb-2 text-3xl font-semibold tracking-tight">Full Access</h2>
-                <p className="leading-7">Access to all features</p>
+                <p className="leading-7">Access all features</p>
                 <p className="text-2xl font-bold">$9.99/month</p>
                 {isSubscribed ? (
                     <form action={createCustomerPortal}>
