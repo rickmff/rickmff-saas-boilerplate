@@ -12,7 +12,7 @@ export default function Page() {
           Sign up to get started
         </p>
       </div>
-      <SignUp 
+      <SignUp
         appearance={{
           elements: {
             card: "bg-card border border-border shadow-lg rounded-xl p-6",
@@ -25,9 +25,12 @@ export default function Page() {
             footer: "hidden"
           }
         }}
-        forceRedirectUrl="/dashboard" 
+        forceRedirectUrl="/dashboard"
       />
-      <p className='mt-2 text-lg text-muted-foreground'>Already have an account? <Link href="/sign-in" className='underline'>Sign in</Link></p>
+      <p className='mt-2 text-lg text-muted-foreground'>
+        Already have an account?
+        <Link href="/sign-in" className='underline'>Sign in</Link>
+      </p>
     </div>
-)
+  )
 }

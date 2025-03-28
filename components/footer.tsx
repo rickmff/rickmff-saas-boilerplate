@@ -5,7 +5,7 @@ export function Footer() {
         <div className="py-8 md:flex md:items-center md:justify-between">
           <div className="text-center md:text-left">
             <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} Prompt Manager. All rights reserved.
+              &copy; {new Date().getFullYear()} Boilerplate. All rights reserved.
             </p>
           </div>
           <div className="mt-4 flex justify-center space-x-6 md:mt-0">

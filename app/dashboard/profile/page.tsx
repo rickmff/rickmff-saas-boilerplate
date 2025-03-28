@@ -1,35 +1,55 @@
-'use client';
-
-import { useUser } from '@clerk/nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser } from '@/app/context/user-context';
+import { Skeleton } from '@/components/ui/skeleton';
+import { UserProfile } from '@clerk/nextjs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-4 w-2/4" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Profile</h2>
-        <p className="text-muted-foreground">
-          Manage your account settings and preferences.
-        </p>
-      </div>
-
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Manage your profile settings and account preferences.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium">Name</p>
-              <p className="text-lg">{user?.firstName} {user?.lastName}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Email</p>
-              <p className="text-lg">{user?.primaryEmailAddress?.emailAddress}</p>
+            <div className="grid gap-4">
+              <div className="flex items-center gap-4">
+                <div>
+                  <p className="font-medium">{user?.name || 'No name set'}</p>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                </div>
+              </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+          <CardDescription>Update your profile information using Clerk&apos;s built-in components.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UserProfile />
         </CardContent>
       </Card>
     </div>
