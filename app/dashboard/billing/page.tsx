@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Loader2 } from 'lucide-react'
 import { useUser } from '@/app/context/user-context'
 import { cn } from '@/lib/utils'
-
+import { redirect } from 'next/navigation'
 export default function BillingPage() {
   const { user } = useUser()
   const [isLoading, setIsLoading] = useState(false)
@@ -39,8 +39,8 @@ export default function BillingPage() {
     }
   }
 
-  if (!user) {
-    return null
+  if (!user || !user.subscription) {
+    return redirect('/dashboard')
   }
 
   return (
