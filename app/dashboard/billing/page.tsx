@@ -80,7 +80,7 @@ export default function BillingPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              You don't have an active subscription.
+              You don&apos;t have an active subscription.
             </p>
           </CardContent>
         </Card>

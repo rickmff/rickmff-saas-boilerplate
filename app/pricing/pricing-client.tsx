@@ -1,12 +1,11 @@
 "use client"
 
-import { handleCustomerPortal, handleSubscription } from "@/app/actions/subscription"
+import { handleSubscription } from "@/app/actions/subscription"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useState } from "react"
 import { Stripe } from "stripe"
-import Link from "next/link"
 
 interface SubscriptionStatus {
   status: string;
@@ -17,36 +16,25 @@ interface SubscriptionStatus {
   priceId?: string;
 }
 
-interface StripePriceData {
-  id: string;
-  unit_amount: number | null;
-  recurring: {
-    interval: 'month' | 'year';
-  } | null;
-}
-
-interface StripeProductData {
-  id: string;
-  name: string;
-  description: string | null;
-  metadata: Record<string, string>;
-  default_price: StripePriceData;
-  prices?: {
-    data: StripePriceData[];
-  };
+interface DbUser {
+  stripeCustomerId: string | null;
 }
 
 interface PricingClientProps {
   products: Stripe.Product[];
   subscriptionStatus: SubscriptionStatus;
   isSubscribed: boolean;
-  dbUser: any; // Replace with your actual user type
+  dbUser: DbUser;
+}
+
+type StripePrice = Stripe.Price & {
+  recurring?: {
+    interval: 'month' | 'year';
+  } | null;
 }
 
 export default function PricingClient({
   products,
-  subscriptionStatus,
-  isSubscribed,
   dbUser
 }: PricingClientProps) {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -81,27 +69,26 @@ export default function PricingClient({
 
       <div className="flex gap-8 justify-center">
         {productsWithPrices.map((product) => {
-          const prices = (product as any).prices?.data || [];
-          const monthlyPrice = prices.find((p: any) => p.recurring?.interval === 'month') || product.default_price;
-          const yearlyPrice = prices.find((p: any) => p.recurring?.interval === 'year');
+          const prices = (product as Stripe.Product & { prices?: { data: StripePrice[] } }).prices?.data || [];
+          const monthlyPrice = prices.find((p) => p.recurring?.interval === 'month') || product.default_price as StripePrice;
+          const yearlyPrice = prices.find((p) => p.recurring?.interval === 'year');
 
           const price = isAnnual && yearlyPrice ? yearlyPrice : monthlyPrice;
-          const amount = (price as Stripe.Price)?.unit_amount ? price.unit_amount / 100 : 0;
-          const interval = (price as Stripe.Price)?.recurring?.interval;
+          const amount = price?.unit_amount ? price.unit_amount / 100 : 0;
+          const interval = price?.recurring?.interval;
           const isFree = amount === 0;
-          const isCurrentPlan = isFree ? !isSubscribed : (subscriptionStatus?.subscription?.price_id === price.id);
 
           // Extract features from metadata
           const features = Object.entries(product.metadata || {})
             .filter(([key]) => key.startsWith('feature_'))
-            .map(([_, value]) => value);
+            .map(([, value]) => value);
 
           return (
             <div
               key={product.id}
-              className={`rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden relative w-full md:w-1/3 ${product.metadata.recommended ? 'ring-2 ring-primary' : ''}`}
+              className={`rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden relative w-full md:w-1/3 ${product.metadata?.recommended ? 'ring-2 ring-primary' : ''}`}
             >
-              {product.metadata.recommended && (
+              {product.metadata?.recommended && (
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium">
                   RECOMMENDED
                 </div>
@@ -118,7 +105,7 @@ export default function PricingClient({
                 <p className="mt-2 text-muted-foreground">{product.description}</p>
 
                 <ul className="mt-6 space-y-3 flex-grow">
-                  {features.map((feature: string, index: number) => (
+                  {features.map((feature, index) => (
                     <li key={index} className="flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -128,7 +115,11 @@ export default function PricingClient({
                   ))}
                 </ul>
 
-                <form action={() => handleSubscription(dbUser.stripeCustomerId)} className="mt-6">
+                <form action={async () => {
+                  if (dbUser.stripeCustomerId) {
+                    await handleSubscription(dbUser.stripeCustomerId)
+                  }
+                }} className="mt-6">
                   <Button type="submit" className="w-full" variant={isFree ? "outline" : "default"}>
                     {isFree ? "Current Plan" : "Subscribe Now"}
                   </Button>
