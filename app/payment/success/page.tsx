@@ -10,7 +10,7 @@ export default function Success() {
             <div className="w-[300px] h-[2px] bg-green-300"></div>
             <p className="text-xl">Thank you for your purchase. Your payment has been processed succesfully.</p>
             <Button>
-                <Link href="/pricing">Return to Pricing</Link>
+                <Link href="/dashboard">Go to Dashboard</Link>
             </Button>
         </div>
     )

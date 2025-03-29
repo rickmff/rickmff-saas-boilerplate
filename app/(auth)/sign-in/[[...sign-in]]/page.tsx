@@ -24,7 +24,7 @@ export default function Page() {
             footer: "hidden"
           }
         }}
-        forceRedirectUrl="/dashboard"
+        forceRedirectUrl="/pricing"
       />
     </div>
   )

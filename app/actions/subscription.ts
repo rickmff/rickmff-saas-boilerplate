@@ -1,3 +1,5 @@
+'use server'
+
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getStripeSession, stripe } from "@/lib/stripe";
@@ -59,10 +61,25 @@ export async function createCustomerPortal(stripeCustomerId: string) {
     return redirect('/sign-in');
   }
 
-  const customerPortalUrl = await stripe.billingPortal.sessions.create({
-    customer: stripeCustomerId,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
-  });
+  return redirect(process.env.STRIPE_CUSTOMER_PORTAL_URL || '');
+}
 
-  return redirect(customerPortalUrl.url);
+export async function handleCustomerPortal(customerId: string) {
+  if (!customerId) return;
+  await createCustomerPortal(customerId);
+}
+
+export async function handleSubscription(customerId: string) {
+  if (!customerId) return;
+  await createSubscription(customerId);
+}
+
+export async function handleManageSubscription() {
+  const user = await currentUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  return createCustomerPortal(user.id)
 }
