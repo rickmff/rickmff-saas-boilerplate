@@ -1,8 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { UserProfile } from '@clerk/nextjs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-function ProfileSkeleton() {
+export default function Loading() {
   return (
     <div className="space-y-4">
       <Card>
@@ -14,14 +13,6 @@ function ProfileSkeleton() {
           <Skeleton className="h-96 w-full" />
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-export default function ProfilePage() {
-  return (
-    <div className="space-y-6">
-      <UserProfile routing="hash" fallback={<ProfileSkeleton />} />
     </div>
   );
 }

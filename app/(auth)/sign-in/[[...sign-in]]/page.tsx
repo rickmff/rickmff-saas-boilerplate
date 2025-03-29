@@ -1,5 +1,4 @@
 import { SignIn } from '@clerk/nextjs'
-import Link from 'next/link'
 
 export default function Page() {
   return (
@@ -12,7 +11,7 @@ export default function Page() {
           Sign up to get started
         </p>
       </div>
-      <SignIn 
+      <SignIn
         appearance={{
           elements: {
             card: "bg-card border border-border shadow-lg rounded-xl p-6",
@@ -25,9 +24,8 @@ export default function Page() {
             footer: "hidden"
           }
         }}
-        forceRedirectUrl="/dashboard" 
+        forceRedirectUrl="/dashboard"
       />
-      <p className='mt-2 text-lg text-muted-foreground'>Don&apos;t have an account? <Link href="/sign-up" className='underline'>Sign up</Link></p>
     </div>
-)
+  )
 }

@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { UserProvider } from '@/app/context/user-context';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
+import { Toaster } from 'sonner'
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default async function RootLayout({
           <UserProvider>
             <Navbar />
             {children}
+            <Toaster />
           </UserProvider>
         </body>
       </html>

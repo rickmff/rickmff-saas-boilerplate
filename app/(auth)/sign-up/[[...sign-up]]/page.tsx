@@ -1,5 +1,4 @@
 import { SignUp } from '@clerk/nextjs'
-import Link from 'next/link'
 
 export default function Page() {
   return (
@@ -27,10 +26,6 @@ export default function Page() {
         }}
         forceRedirectUrl="/dashboard"
       />
-      <p className='mt-2 text-lg text-muted-foreground'>
-        Already have an account?
-        <Link href="/sign-in" className='underline'>Sign in</Link>
-      </p>
     </div>
   )
 }

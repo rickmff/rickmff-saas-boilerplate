@@ -53,7 +53,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           throw new Error(`Failed to fetch user: ${response.statusText}`);
         }
         const userData = await response.json();
-        setUser(userData);
+
+        // Add the Clerk user's profile image URL to the user data
+        setUser({
+          ...userData,
+          imageUrl: clerkUser.imageUrl || null
+        });
       } catch (error) {
         console.error('Error fetching user:', error);
         setUser(null);

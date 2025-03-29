@@ -1,3 +1,4 @@
+'use client';
 import { useUser } from '@/app/context/user-context';
 
 export function WelcomeMessage() {

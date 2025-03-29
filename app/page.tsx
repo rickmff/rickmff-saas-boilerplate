@@ -1,4 +1,3 @@
-import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -7,9 +6,7 @@ import { ArrowRight, BookMarked, FileText, Sparkles } from 'lucide-react';
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
       <main className="flex-1">
-        {/* Hero Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-muted">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
@@ -28,7 +25,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-3 gap-8">
