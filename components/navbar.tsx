@@ -120,7 +120,7 @@ export function Navbar() {
                     disabled={item.disabled}
                     className={item.disabled ? "cursor-not-allowed opacity-60" : ""}
                   >
-                    <Link href={item.href} className="flex items-center w-full cursor-default">
+                    <Link href={item.href} className="flex items-center w-full hover:bg-accent">
                       <item.icon className="mr-2 h-4 w-4" />
                       {item.label}
                     </Link>
@@ -129,7 +129,7 @@ export function Navbar() {
                 <div className="h-px bg-border my-1" />
                 <DropdownMenuItem asChild className="text-destructive focus:bg-destructive/10">
                   <CustomSignOutButton forceRedirectUrl='/sign-in'>
-                    <div className="flex items-center w-full cursor-default">
+                    <div className="flex items-center w-full">
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
                     </div>
