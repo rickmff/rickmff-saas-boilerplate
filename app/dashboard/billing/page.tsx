@@ -3,28 +3,26 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { toast } from '@/components/ui/use-toast'
+import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { useUser } from '@/app/context/user-context'
 import { cn } from '@/lib/utils'
 import { redirect } from 'next/navigation'
-import { handleManageSubscription as manageSubscriptionAction } from '@/app/actions/subscription'
+import { handleManageSubscription } from '@/app/actions/subscription'
 
 export default function BillingPage() {
-  const { user } = useUser()
+  const { user, refreshUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleManageSubscription = async () => {
+  const handleManageSubscriptionClick = async () => {
     try {
       setIsLoading(true)
-      await manageSubscriptionAction()
+      await handleManageSubscription()
+      // After returning from Stripe portal, refresh user data
+      await refreshUser()
     } catch (error) {
       console.error('Error managing subscription:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to manage subscription. Please try again.',
-        variant: 'destructive',
-      })
+      toast.error('Failed to manage subscription. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -46,22 +44,20 @@ export default function BillingPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <>
-                <p className="text-sm text-muted-foreground inline-block font-bold">
-                  Status:
-                </p>
-                <pre className={cn('px-3 py-1 rounded-full inline-block ml-2 text-xs', user.subscription.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600')} >
-                  {user.subscription.status}
-                </pre>
-                <p className="text-sm text-muted-foreground">
-                  <b>Next billing date:</b> {new Date(user.subscription.current_period_end * 1000).toLocaleDateString()}
-                </p>
-              </>
+              <p className="text-sm text-muted-foreground inline-block font-bold">
+                Status:
+              </p>
+              <pre className={cn('px-3 py-1 rounded-full inline-block ml-2 text-xs', user.subscription.status === 'active' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600')} >
+                {user.subscription.status}
+              </pre>
+              <p className="text-sm text-muted-foreground">
+                <b>Next billing date:</b> {new Date(user.subscription.current_period_end * 1000).toLocaleDateString()}
+              </p>
             </div>
           </CardContent>
           <CardFooter>
             <Button
-              onClick={handleManageSubscription}
+              onClick={handleManageSubscriptionClick}
               disabled={isLoading}
               variant="outline"
             >

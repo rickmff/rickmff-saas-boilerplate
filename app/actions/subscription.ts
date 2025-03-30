@@ -61,7 +61,12 @@ export async function createCustomerPortal(stripeCustomerId: string) {
     return redirect('/sign-in');
   }
 
-  return redirect(process.env.STRIPE_CUSTOMER_PORTAL_URL || '');
+  const portalUrl = await stripe.billingPortal.sessions.create({
+    customer: stripeCustomerId,
+    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing`,
+  });
+
+  return redirect(portalUrl.url);
 }
 
 export async function handleCustomerPortal(customerId: string) {
@@ -75,11 +80,20 @@ export async function handleSubscription(customerId: string) {
 }
 
 export async function handleManageSubscription() {
-  const user = await currentUser()
+  const user = await currentUser();
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new Error('Unauthorized');
   }
 
-  return createCustomerPortal(user.id)
+  const [dbUser] = await db.select()
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1);
+
+  if (!dbUser?.stripeCustomerId) {
+    throw new Error('No customer ID found');
+  }
+
+  return createCustomerPortal(dbUser.stripeCustomerId);
 }

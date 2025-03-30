@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useState } from "react"
 import { Stripe } from "stripe"
+import { toast } from "sonner"
 
 interface SubscriptionStatus {
   status: string;
@@ -38,6 +39,7 @@ export default function PricingClient({
   dbUser
 }: PricingClientProps) {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filter out products without prices and sort them
   const productsWithPrices = products
@@ -47,6 +49,24 @@ export default function PricingClient({
       const priceB = ((b.default_price as Stripe.Price)?.unit_amount) || 0;
       return priceA - priceB;
     });
+
+  const handleSubscribeClick = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      setIsLoading(true);
+      if (dbUser.stripeCustomerId) {
+        await handleSubscription(dbUser.stripeCustomerId);
+      } else {
+        toast.error("No customer ID found. Please try again or contact support.");
+      }
+    } catch (error) {
+      console.error("Subscription error:", error);
+      toast.error("Failed to process subscription. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-4">
@@ -115,13 +135,9 @@ export default function PricingClient({
                   ))}
                 </ul>
 
-                <form action={async () => {
-                  if (dbUser.stripeCustomerId) {
-                    await handleSubscription(dbUser.stripeCustomerId)
-                  }
-                }} className="mt-6">
-                  <Button type="submit" className="w-full" variant={isFree ? "outline" : "default"}>
-                    {isFree ? "Current Plan" : "Subscribe Now"}
+                <form onSubmit={handleSubscribeClick} className="mt-6">
+                  <Button type="submit" className="w-full" variant={isFree ? "outline" : "default"} disabled={isLoading}>
+                    {isLoading ? "Processing..." : isFree ? "Current Plan" : "Subscribe Now"}
                   </Button>
                 </form>
               </div>

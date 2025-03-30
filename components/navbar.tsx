@@ -14,6 +14,7 @@ import { SignInButton, SignOutButton } from '@clerk/nextjs';
 import { useUser } from '@/app/context/user-context';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CustomSignOutButton } from './CustomSignOutButton';
 
 export function NavbarSkeleton() {
   return (
@@ -127,12 +128,12 @@ export function Navbar() {
                 ))}
                 <div className="h-px bg-border my-1" />
                 <DropdownMenuItem asChild className="text-destructive focus:bg-destructive/10">
-                  <SignOutButton>
+                  <CustomSignOutButton forceRedirectUrl='/sign-in'>
                     <div className="flex items-center w-full cursor-default">
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
                     </div>
-                  </SignOutButton>
+                  </CustomSignOutButton>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -168,12 +169,12 @@ export function Navbar() {
                       <span>{item.label}</span>
                     </Link>
                   ))}
-                  <SignOutButton>
+                  <CustomSignOutButton forceRedirectUrl='/sign-in'>
                     <button className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md text-destructive w-full">
                       <LogOut className="h-4 w-4" />
                       <span>Sign out</span>
                     </button>
-                  </SignOutButton>
+                  </CustomSignOutButton>
                 </>
               ) : (
                 <SignInButton>

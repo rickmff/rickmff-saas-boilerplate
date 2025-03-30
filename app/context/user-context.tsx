@@ -2,8 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { Subscription } from '@/types/stripe';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useUser as useClerkUser } from '@clerk/nextjs';
+import { getCurrentUser } from '@/app/actions/user';
 
 interface User {
   id: string;
@@ -17,61 +16,34 @@ interface User {
 interface UserContextType {
   user: User | null;
   isLoading: boolean;
+  refreshUser: () => Promise<void>;
 }
 
-const UserContext = createContext<UserContextType>({
-  user: null,
-  isLoading: true,
-});
-
-export function UserLoadingSkeleton() {
-  return (
-    <div className="flex items-center space-x-4">
-      <Skeleton className="h-12 w-12 rounded-full" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[200px]" />
-        <Skeleton className="h-4 w-[150px]" />
-      </div>
-    </div>
-  );
-}
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user: clerkUser } = useClerkUser();
+
+  const fetchUser = async () => {
+    try {
+      setIsLoading(true);
+      const userData = await getCurrentUser();
+      setUser(userData);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        if (!clerkUser) {
-          setIsLoading(false);
-          return;
-        }
-        const response = await fetch('/api/user');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user: ${response.statusText}`);
-        }
-        const userData = await response.json();
-
-        // Add the Clerk user's profile image URL to the user data
-        setUser({
-          ...userData,
-          imageUrl: clerkUser.imageUrl || null
-        });
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchUser();
-  }, [clerkUser]);
+  }, []);
 
   return (
-    <UserContext.Provider value={{ user, isLoading }}>
+    <UserContext.Provider value={{ user, isLoading, refreshUser: fetchUser }}>
       {children}
     </UserContext.Provider>
   );
