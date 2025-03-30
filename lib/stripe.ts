@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: "2024-12-18.acacia", // Updated to the correct version
+    apiVersion: "2025-02-24.acacia", // Updated to the correct version
     typescript: true
 })
 
@@ -9,7 +9,7 @@ export const getStripeSession = async ({
     priceId,
     domainUrl,
     customerId,
-} : {
+}: {
     priceId: string;
     domainUrl: string;
     customerId: string;
@@ -25,7 +25,7 @@ export const getStripeSession = async ({
                 quantity: 1
             }
         ],
-        customer_update: { name:"auto", address: "auto"},
+        customer_update: { name: "auto", address: "auto" },
         success_url: `${domainUrl}/payment/success`,
         cancel_url: `${domainUrl}/payment/cancelled`
     })
