@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SignInButton, SignOutButton } from '@clerk/nextjs';
+import { SignInButton } from '@clerk/nextjs';
 import { useUser } from '@/app/context/user-context';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';

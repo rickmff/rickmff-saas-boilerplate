@@ -1,0 +1,84 @@
+---
+description: 
+globs: 
+---
+# Project Rules
+
+## Project Structure
+This is a Next.js SaaS boilerplate with Clerk authentication, Stripe payments, and PostgreSQL database using Drizzle ORM.
+
+## Server Actions
+Prioritize using Next.js server actions (in app/actions/) for all data mutations and server-side logic. Mark server action files with 'use server' at the top. Handle errors properly and return structured responses.
+
+## Server vs Client Components
+Build components as server components by default. Only use 'use client' when absolutely necessary for interactivity. Encapsulate client-side logic in minimal client components while keeping the majority of the UI as server components for better performance.
+
+## Error Handling
+Always use the AppError class from lib/errors.ts for consistent error handling. Include proper error codes from ErrorCodes enum, and ensure errors are properly caught and displayed to users.
+
+## Toast Notifications
+Always use Sonner for toast notifications. Import from the root Toaster component. Use toastPromise for async operations with loading/success/error states.
+
+## Loading States
+Use React Suspense for loading states with Skeleton components as fallbacks. Implement proper loading indicators for all async operations to improve user experience.
+
+## UI Design
+Follow a minimalist and modern design aesthetic. Use subtle animations, proper spacing, and a clean color palette. Ensure all UI elements are accessible and responsive.
+
+## Component Structure
+UI components follow the shadcn/ui pattern with React.forwardRef and proper TypeScript typing. Ensure components are modular, reusable, and well-documented.
+
+## Database Schema
+Database schema is defined in lib/db/schema.ts using Drizzle ORM with PostgreSQL. Follow the established pattern for defining tables, relations, and indexes.
+
+## Authentication
+Authentication is handled by Clerk. User data is synced to the database via webhooks. Always verify user authentication in server actions and protected routes.
+
+## Styling
+Styling uses Tailwind CSS with custom theme variables defined in app/globals.css. Maintain consistency with the design system and use the cn utility for conditional classes.
+
+## Performance Optimization
+Prioritize performance by using server components, optimizing images, implementing proper caching strategies, and minimizing client-side JavaScript.
+
+## Security Best Practices
+Follow security best practices: validate all inputs, prevent XSS attacks, use CSRF protection, implement proper authentication checks, and follow the principle of least privilege.
+
+## Form Handling
+Use react-hook-form for form state management with zod for validation. Implement proper error handling and user feedback for form submissions.
+
+## Code Style
+Use TypeScript for type safety. Follow ESLint rules defined in .eslintrc.json. Ensure proper typing for all functions, components, and variables.
+
+## UI Components
+Use the existing UI components in components/ui/ for consistency. They follow shadcn/ui patterns. Extend these components rather than creating new design patterns.
+
+## State Management
+Use React context for global state (like UserProvider) and React hooks for component state. Minimize client-side state management where possible.
+
+## API Routes
+API routes are defined in app/api/ directory following Next.js App Router conventions. Prefer server actions over API routes when possible.
+
+## Naming Conventions
+Use camelCase for variables and functions, PascalCase for components and types, and kebab-case for file names.
+
+## Imports
+Group imports by:
+1. React/Next.js
+2. External libraries
+3. Internal components/utils
+4. Types/interfaces
+
+## Database Migrations
+Database migrations are managed with Drizzle Kit. Use npm run generate to create migrations and npm run push to apply them.
+
+## Environment Variables
+Store sensitive configuration in .env.local file (not committed to git). Reference them via process.env.
+
+## Subscriptions
+Subscription management is handled via Stripe integration in lib/stripe.ts and app/actions/subscription.ts.
+
+## Responsive Design
+Use Tailwind's responsive classes (sm:, md:, lg:, etc.) for responsive design. Ensure all UI is fully responsive and works well on mobile devices.
+
+## Accessibility
+Ensure all components are accessible. Use proper ARIA attributes, semantic HTML, and ensure sufficient color contrast. Test with keyboard navigation.
